@@ -157,26 +157,3 @@ output reg [15:0] data
       
 endmodule
 
-module MSclk (
- input clk, 
- input reset,  
- output slow_clk 
- );  
-  //testing
-   reg [19:0] COUNT; 
-   //  reg [26:0] COUNT; 
-  initial begin
-    COUNT = 0;
-    end
-    //testing
-   assign slow_clk = COUNT[19] ;  
-  // assign slow_clk = COUNT[26]; 
-    always @ (posedge clk) 
-    begin 
-    if(reset) 
-      COUNT = 0; 
-    else  
-     COUNT = COUNT + 1; 
-    end
- endmodule
-
