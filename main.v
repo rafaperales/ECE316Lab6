@@ -19,7 +19,6 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
 module main( 
 input clk,
 input [1:0] mode, 
@@ -29,22 +28,25 @@ input start_stop,
 output [3:0] an, 
 output [6:0] sseg, 
 output dp
-    );    
+    );     
+    wire EdgeStartStop; 
+    wire Edgereset;
+    RisingEdgeDetector r0 (.clk(clk), .signal(start_stop),.Outedge(EdgeStartStop));  
+    RisingEdgeDetector r1 (.clk(clk), .signal(reset),.Outedge(Edgereset)); 
      // fsm
     wire enable ; 
     wire addsub;
     wire load_preset;
-    fsm f0 (.clk(clk), .mode(mode),. reset(reset), .start_stop(start_stop), .addsub(addsub),.enable(enable),.load_preset(load_preset));
+    fsm f0 (.clk(clk), .mode(mode),. reset(Edgereset), .start_stop(EdgeStartStop), .addsub(addsub),.enable(enable),.load_preset(load_preset));
     
     
     // inc/dec    
      wire [15:0] data;
      
-     Inc_Dec Q0 (.clk(clk), .reset(reset),.enable(enable),.load_preset(load_preset), .addsub(addsub),.mode(mode), .sw(sw),.data(data));
-     FourDigitDisplay Q1 ( .clk(clk), .reset(reset), .sw(data), .an(an), .sseg(sseg),.dp(dp));
+     Inc_Dec Q0 (.clk(clk), .reset(Edgereset),.enable(enable),.load_preset(load_preset), .addsub(addsub),.mode(mode), .sw(sw),.data(data));
+     FourDigitDisplay Q1 ( .clk(clk), .reset(Edgereset), .sw(data), .an(an), .sseg(sseg),.dp(dp));
     //display
 endmodule
-
 
 
 
