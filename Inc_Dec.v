@@ -109,13 +109,16 @@ output reg [15:0] data
                             local1 <= local1 -1; 
                        end 
                       
-                       else if ( local1 == 0 & local2 > 0) 
+                       else if ( local0 == 0 & local1 == 0 & local2 > 0) 
                        begin 
+                             local0 <= 9;
                              local1 <= 9;
                             local2 <= local2 - 1; 
                        end 
-                       else if ( local2 == 0 & local3 > 0) 
+                       else if ( local0 == 0 & local1 == 0 &local2 == 0 & local3 > 0) 
                        begin 
+                            local0 <= 9;
+                            local1 <= 9;
                             local2 <= 9;
                             local3 <= local3 - 1; 
                        end
@@ -126,19 +129,22 @@ output reg [15:0] data
                        begin 
                            local0 <= local0 +1; 
                        end
-                       if ( local0 == 9 & local1 < 9) 
+                       else if( local0 == 9 & local1 < 9) 
                        begin  
                             local0 <= 0;
                             local1 <= local1 +1; 
                        end 
                       
-                       if ( local1 == 9 & local2 < 9) 
-                       begin 
+                       else if ( local0 == 9 &local1 == 9 & local2 < 9) 
+                       begin  
+                             local0 <= 0;
                              local1 <= 0;
                             local2 <= local2 +1; 
                        end 
-                       if ( local2 == 9 & local3 < 9) 
+                       else if ( local0 == 9 &local1 == 9 & local2 == 9 & local3 < 9) 
                        begin 
+                            local0 <= 0;
+                            local1 <= 0;
                             local2 <= 0;
                             local3 <= local3 +1; 
                        end 
@@ -157,3 +163,25 @@ output reg [15:0] data
       
 endmodule
 
+module MSclk (
+ input clk, 
+ input reset,  
+ output slow_clk 
+ );  
+  //testing
+   reg [19:0] COUNT; 
+   //  reg [26:0] COUNT; 
+  initial begin
+    COUNT = 0;
+    end
+    //testing
+   assign slow_clk = COUNT[19] ;  
+  // assign slow_clk = COUNT[26]; 
+    always @ (posedge clk) 
+    begin 
+    if(reset) 
+      COUNT = 0; 
+    else  
+     COUNT = COUNT + 1; 
+    end
+ endmodule
