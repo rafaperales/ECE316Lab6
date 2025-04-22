@@ -19,107 +19,73 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module Edge_Detector(
+module RisingEdgeDetector (
+  input   clk,
+  input   signal,
+  output  reg Outedge
+); 
+    wire debounced;
+  Debouncer (.clk(clk),.signal(signal),.debounced(debounced));
+  reg signalPrev;
+
+  always @(posedge clk) begin
+    signalPrev <= debounced;
+    Outedge <= (debounced && !signalPrev);
+  end
+
+endmodule 
+
+
+module Debouncer(
     input clk,
     input signal,
-    output reg outedge
+    output reg debounced
 );
-    reg signal_d;
-    always @(posedge clk) begin
-        signal_d <= signal;
-        outedge <= signal & ~signal_d;
+    wire slow_clk;
+    reg [1:0] state;
+
+    clkdiv cl(.clk(clk), .clk_out(slow_clk));
+
+    always @(posedge slow_clk) begin
+        case (state)
+            2'b00: begin
+                if (signal)
+                    state <= 2'b01;
+            end
+            2'b01: begin
+                if (signal)
+                    state <= 2'b10;
+                else
+                    state <= 2'b00;
+            end
+            2'b10: begin
+                if (!signal)
+                    state <= 2'b00;
+            end
+        endcase
+
+        debounced <= (state != 2'b00);
     end
 endmodule
-//module Edge_Detector(
-//    input clk,
-//    input signal,
-//    input reset,
-//    output reg outedge
-//    );
-    
-//    wire slow_clk;
-    
-//    reg [1:0] state;
-//    reg [1:0] next_state;
-    
-//    clkdiv cl(clk, reset, slow_clk);
 
-//    //Combinational Logic:
+module clkdiv(
+
+    input clk,
+    output clk_out
+
+    );
     
-//    always @(*)begin
+    reg [15:0] COUNT;
+    
+    initial begin
+    COUNT = 0;
+    end
+    
+        assign clk_out = COUNT[15];
         
-//        case (state)
-        
-//            2'b00 : begin
-//                outedge = 1'b0;
-//                if (~signal)
-//                    next_state = 2'b00;
-//                else
-//                    next_state = 2'b01;
-//                end
-                
-//            2'b01 : begin
-//                outedge = 1'b1;
-//                if (~signal)
-//                    next_state = 2'b00;
-//                else 
-//                         next_state = 2'b10;
-//            end
-            
-//            2'b10 : begin 
-//                outedge = 1'b0;
-//                if(~signal)
-//                    next_state = 2'b00;
-//                else
-//                    next_state = 2'b10;
-//                end
-            
-//            default : begin
-//                next_state = 2'b00;
-//                outedge = 1'b0;
-//                end
-                
-//       endcase
-       
-       
-       
-//   end
-   
-//   //Sequential Logic
-   
-//   always @(posedge slow_clk) begin
-//    if (reset)
-//        state <= 2'b00;
-//    else
-//         state <= next_state;
-   
-//   end 
-
-
-//endmodule
-
-//module clkdiv(
-
-//    input clk,
-//    input reset,
-//    output clk_out
-
-//    );
-    
-//    reg [2:0] COUNT;
-    
-//    initial begin
-//    COUNT = 0;
-//    end
-    
-//        assign clk_out = COUNT[2];
-        
-//        always @(posedge clk)
-//        begin
-//        if (reset)
-//            COUNT = 0;
-//         else 
-//            COUNT = COUNT + 1;
-//         end
+        always @(posedge clk)
+        begin
+            COUNT = COUNT + 1;
+         end
          
-//endmodule
+endmodule
